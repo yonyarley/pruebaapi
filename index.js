@@ -21,27 +21,50 @@ const Usuarios = mongoose.model('Usuarios', new mongoose.Schema({
 
 const app = express();
 
-// Conexión a MongoDB Atlas (o a Docker si lo prefieres)
-console.log("🔍 MONGO_URI:", process.env.MONGO_URI);
-mongoose.connect(process.env.MONGO_URI)
+const uri = process.env.MONGO_URI;
+
+if (!uri) {
+  console.error("❌ MONGO_URI no está definida. Revisa tus variables de entorno.");
+  process.exit(1); // Salir para evitar error en conexión
+}
+
+console.log("🔍 MONGO_URI:", uri);
+
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log("✅ Conectado correctamente a MongoDB"))
-  .catch(err => console.error("❌ Error al conectar con MongoDB:", err));
+  .catch(err => {
+    console.error("❌ Error al conectar con MongoDB:", err);
+    process.exit(1);
+  });
 
 // Rutas
 app.get('/', async (_req, res) => {
   console.log("📋 Listando usuarios...");
-  const usuarios = await Usuarios.find();
-  return res.send(usuarios);
+  try {
+    const usuarios = await Usuarios.find();
+    return res.send(usuarios);
+  } catch (error) {
+    console.error("❌ Error al listar usuarios:", error);
+    return res.status(500).send("Error al listar usuarios");
+  }
 });
 
 app.get('/crear', async (_req, res) => {
   console.log("🆕 Insertando usuario...");
-  await Usuarios.create({
-    'usuario': 'harol',
-    'correo': 'hmgomezz@sena.edu.co',
-    'clave': '12345'
-  });
-  return res.send("✅ Usuario creado correctamente");
+  try {
+    await Usuarios.create({
+      usuario: 'harol',
+      correo: 'hmgomezz@sena.edu.co',
+      clave: '12345'
+    });
+    return res.send("✅ Usuario creado correctamente");
+  } catch (error) {
+    console.error("❌ Error al crear usuario:", error);
+    return res.status(500).send("Error al crear usuario");
+  }
 });
 
 app.get('/nueva', (_req, res) => res.send("Ruta creada en desarrollo OK"));
