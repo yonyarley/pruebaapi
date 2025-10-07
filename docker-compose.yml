@@ -3,28 +3,9 @@ services:
     build:
       context: ./appprueba
       dockerfile: Dockerfile
-    container_name: appprueba_app
     ports:
       - "3000:3000"
-    depends_on:
-      - mongohmgz
     environment:
       NODE_ENV: production
-      MONGO_URI: mongodb://root:r0O7@mongohmgz:27017/mibd?authSource=admin
-    restart: unless-stopped
-
-  mongohmgz:
-    image: mongo:6.0
-    container_name: mongohmgz
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: r0O7
-      MONGO_INITDB_DATABASE: mibd
-    volumes:
-      - mongo_data:/data/db
-    restart: unless-stopped
-
-volumes:
-  mongo_data:
+      MONGO_URI: ${MONGO_URI}
+    command: ["node", "index.js"]
