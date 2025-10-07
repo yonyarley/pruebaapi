@@ -22,7 +22,8 @@ const Usuarios = mongoose.model('Usuarios', new mongoose.Schema({
 const app = express();
 
 // Conexión a MongoDB Atlas (o a Docker si lo prefieres)
-mongoose.connect(process.env.MONGO_URI)
+console.log("🔍 MONGODB_URI:", process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ Conectado correctamente a MongoDB"))
   .catch(err => console.error("❌ Error al conectar con MongoDB:", err));
 
