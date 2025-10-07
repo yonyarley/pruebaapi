@@ -1,7 +1,7 @@
 /**
  * @autor: Harol Mauricio Gómez Zapata
  * @fecha: 25/08/2025
- * @descripcion: Aplicación Express con conexión a MongoDB Atlas
+ * @descripcion: Aplicación Express con conexión a MongoDB Atlas usando variable de entorno
  */
 
 import express from 'express';
