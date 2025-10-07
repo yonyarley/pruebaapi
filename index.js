@@ -1,16 +1,16 @@
 /**
  * @autor: Harol Mauricio Gómez Zapata
  * @fecha: 25/08/2025
- * @descripcion: Pequeña aplicación para probar
- *               una base de datos en un contenedor
- *               Docker o en MongoDB Atlas
+ * @descripcion: Aplicación Express con conexión a MongoDB Atlas
  */
 
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-dotenv.config(); // 👈 Cargar variables del archivo .env
+dotenv.config(); // Cargar variables de entorno
+
+const app = express();
 
 // Modelo de Usuarios
 const Usuarios = mongoose.model('Usuarios', new mongoose.Schema({
@@ -19,25 +19,24 @@ const Usuarios = mongoose.model('Usuarios', new mongoose.Schema({
   clave: String,
 }));
 
-const app = express();
-
-const uri = process.env.MONGO_URI;
-
-if (!uri) {
-  console.error("❌ MONGO_URI no está definida. Revisa tus variables de entorno.");
-  process.exit(1); // Salir para evitar error en conexión
+// Verifica que la URI exista antes de intentar conectarse
+const mongoURI = process.env.MONGO_URI;
+if (!mongoURI) {
+  console.error("❌ MONGO_URI no está definida en las variables de entorno.");
+  process.exit(1);
 }
 
-console.log("🔍 MONGO_URI:", uri);
+// Conexión a MongoDB Atlas
+console.log("🔍 MONGO_URI:", mongoURI);
 
-mongoose.connect(uri, {
+mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-  .then(() => console.log("✅ Conectado correctamente a MongoDB"))
+  .then(() => console.log("✅ Conectado correctamente a MongoDB Atlas"))
   .catch(err => {
-    console.error("❌ Error al conectar con MongoDB:", err);
-    process.exit(1);
+    console.error("❌ Error al conectar con MongoDB:", err.message);
+    process.exit(1); // Salir si no se puede conectar
   });
 
 // Rutas
@@ -45,10 +44,9 @@ app.get('/', async (_req, res) => {
   console.log("📋 Listando usuarios...");
   try {
     const usuarios = await Usuarios.find();
-    return res.send(usuarios);
-  } catch (error) {
-    console.error("❌ Error al listar usuarios:", error);
-    return res.status(500).send("Error al listar usuarios");
+    res.json(usuarios);
+  } catch (err) {
+    res.status(500).send("❌ Error al obtener usuarios.");
   }
 });
 
@@ -60,13 +58,13 @@ app.get('/crear', async (_req, res) => {
       correo: 'hmgomezz@sena.edu.co',
       clave: '12345'
     });
-    return res.send("✅ Usuario creado correctamente");
-  } catch (error) {
-    console.error("❌ Error al crear usuario:", error);
-    return res.status(500).send("Error al crear usuario");
+    res.send("✅ Usuario creado correctamente");
+  } catch (err) {
+    res.status(500).send("❌ Error al crear usuario.");
   }
 });
 
+// Rutas adicionales
 app.get('/nueva', (_req, res) => res.send("Ruta creada en desarrollo OK"));
 app.get('/otra', (_req, res) => res.send("Ruta creada en desarrollo OK"));
 app.get('/de_nuevo', (_req, res) => res.send("Ruta creada en desarrollo OK"));
